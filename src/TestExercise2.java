@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
+import java.util.List;
 
 public class TestExercise2 {
     public AppiumDriver driver;
@@ -52,6 +53,41 @@ public class TestExercise2 {
         );
     }
 
+    @Test
+    public void testSearchWordAndCancelSearch()
+    {
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/search_container"),
+                "Cannot find 'Search Wikipedia'",
+                5
+        );
+
+        waitForElementAndSendKeys(
+                By.id("org.wikipedia:id/search_src_text"),
+                "Appium",
+                "Cannot find 'Search...' field",
+                5
+        );
+
+        waitForManyElementsPresent(
+                By.id("org.wikipedia:id/page_list_item_container"),
+                "Cannot find search results",
+                5
+        );
+
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/search_close_btn"),
+                "Cannot find 'Close' button",
+                5
+        );
+
+        waitForManyElementsNotPresent(
+                "org.wikipedia:id/page_list_item_title",
+                "Results still present on the screen",
+                10
+        );
+    }
+
     private WebElement waitForElementPresent(By by, String error_message, long timeoutInSeconds)
     {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
@@ -66,6 +102,31 @@ public class TestExercise2 {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
         element.click();
         return element;
+    }
+
+    private WebElement waitForElementAndSendKeys(By by, String value, String error_message, long timeoutInSeconds)
+    {
+        WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
+        element.sendKeys(value);
+        return element;
+    }
+
+    private List<WebElement> waitForManyElementsPresent(By by, String error_message, long timeoutInSeconds)
+    {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.withMessage(error_message + "\n");
+        return wait.until(
+                ExpectedConditions.presenceOfAllElementsLocatedBy(by)
+        );
+    }
+
+    private boolean waitForManyElementsNotPresent(String by, String error_message, long timeoutInSeconds) {
+        List<WebElement> searchResults = driver.findElements(By.id("org.wikipedia:id/page_list_item_title"));
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.withMessage(error_message + "\n");
+        return wait.until(
+                ExpectedConditions.invisibilityOfAllElements(searchResults)
+        );
     }
 
 }
